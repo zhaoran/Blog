@@ -36,7 +36,7 @@ InstanceofOperator(O, C){
 
 对于 ES 内置构造器如 `Function()`, `Array()`，其本身是没有 `[Symbol.hasInstance]` 属性的，都继承自 `Function.prototype`，这个方法是预定义的，不可修改：
 
-```
+```javascript
 Reflect.getOwnPropertyDescriptor(Function.prototype, Symbol.hasInstance)
 =>
 Object {writable: false, enumerable: false, configurable: false, value: function}
@@ -61,6 +61,14 @@ Function.prototype[Symbol.hasInstance](V){
 
 ```javascript
 OrdinaryHasInstance(C, O){
+    
+    if(typeof C !== 'function'){
+        return false;
+    }
+    
+    if(typeof O !== 'object'){
+        return false;
+    }
 
     let P = C.prototype;
     
@@ -91,7 +99,7 @@ OrdinaryHasInstance(C, O){
 
 普通的对象，默认是没有 `[Symbol.hasInstance]` 属性的，也继承不到内置的 `Function.prototype[Symbol.hasInstance]()` 方法：
 
-```
+```javascript
 let o = {};
 let a = new Array();
 
@@ -101,14 +109,14 @@ console.log(a instanceof o) // Uncaught TypeError: Right-hand side of 'instanceo
 
 如果要避免报错，可以让 `o` 继承系统内置方法：
 
-```
+```javascript
 Reflect.setPrototypeOf(o, Function.prototype);
 
 console.log(a instanceof o) // false
 ```
 
 也可以直接给其添加 `[Symbol.hasInstance]` 属性：
-```
+```javascript
 Reflect.defineProperty(o, Symbol.hasInstance, {
     value(instance){
         return Array.isArray(instance);
@@ -119,7 +127,7 @@ console.log(a instanceof o) // true
 ```
 
 一种更常规的自定义方法是：
-```
+```javascript
 class C {
     static [Symbol.hasInstance](instance){
         
@@ -134,7 +142,7 @@ console.log(c instanceof C) // false
 ```
 注意，这里定义的是静态方法，是直接挂在 `C` 上的方法，而不是实例方法：
 
-```
+```javascript
 Reflect.getOwnPropertyDescriptor(C, Symbol.hasInstance);
 =>
 Object {writable: true, enumerable: false, configurable: true, value: function}
@@ -142,7 +150,7 @@ Object {writable: true, enumerable: false, configurable: true, value: function}
 
 使用传统的模拟构造函数法：
 
-```
+```javascript
 function F(){}
 
 Reflect.defineProperty(F, Symbol.hasInstance, {
@@ -158,7 +166,7 @@ console.log(f instanceof F) // false
 ```
 
 内置构造器也是可以添加`Symbol.hasInstance`方法的：
-```
+```javascript
 Reflect.defineProperty(Array, Symbol.hasInstance, {
     value(instance){ return typeof instance === 'function';}
 })
@@ -168,7 +176,7 @@ console.log(function(){} instanceof Array) // true
 ```
 
 注意，如果不使用 `defineProperty` 方法，而是用 `[]` 的方法来设置属性的话，是不生效的：
-```
+```javascript
 Array[Symbol.hasInstance] = function(){ return typeof instance === 'function';}
 console.log(Array[Symbol.hasInstance]) // function [Symbol.hasInstance]() { [native code] }
 ```
@@ -177,7 +185,7 @@ console.log(Array[Symbol.hasInstance]) // function [Symbol.hasInstance]() { [nat
 
 也是对操作符右侧变量做修改
 
-```
+```javascript
 function F(){}
 
 F.prototype = {};
