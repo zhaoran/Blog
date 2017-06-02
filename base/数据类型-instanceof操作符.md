@@ -216,3 +216,12 @@ console.log(a instanceof Function) // true
 ```
 对 `a` 的原型链上的任何环节做修改，都可以改变 `instanceof` 操作符的行为。
 
+以上是从纯语法的方面来考虑 `instanceof` 操作符的行为，当涉及到浏览器环境中时，还会有一些需要特别注意的地方。
+
+### 跨 frame 或 window 的情况
+
+同一个页面中不同的 frame 之间，以及主页面与 frame 之间，有着不同的上下文执行环境，和不同的内置对象。当 `instanceof` 操作符涉及到多个 frame 时，就会出现一些非预期的情况：
+```javascript
+[] instanceof window.frames[0].Array // false
+```
+因为 `[]` 是由主页面中的 `Array` 生成的，跟 frame 中的 `Array` 并无关联。当页面中有多个 frame 之间的数据交换时，要特别注意这一点。
