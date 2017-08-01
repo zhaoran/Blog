@@ -353,6 +353,6 @@ oldCh 和 ch 是代表旧和新两个 Vnode 节点序列，oldStartIdx、newStar
 通过以上流程，视图再次得到了更新。同时，新的vnode和elm也会被保存，供下一次视图更新时使用。
 
 以上分析了 Vnode 渲染和更新过程中的主要方法和流程，下面是本例中涉及到的主要方法的流程图：
-
+![Vnode 流程图](./vnode.png "vnode 流程图")
 
 
