@@ -291,21 +291,21 @@ oldCh 和 ch 是代表旧和新两个 Vnode 节点序列，oldStartIdx、newStar
 4. sameVnode(oldEndVnode, newStartVnode) 情况下，是要将 oldEndVnode 向左移动到 oldStartIdx 对应的节点前面，比如：[A, B] => [B, C]
 5. 在以上条件都不满足的情况下，就要根据 newStartVnode 的 key 属性来进一步处理：
     1. 如果 newStartVnode 没有对应到 oldCh 中的某个元素，比如：[A, B] => [C]，说明这个节点是新增加的，那么就调用 createElm() 新建节点及其子节点
-    2. 如果 newStartVnode 对应到了 oldCh 中的某个元素，比如：[A, B, C] => [B, A, E]，那么就直接移动该元素到 oldStartIdx 对应的节点前面，此时，还会 将 oldCh 中对应的节点置为 undefined，表示元素已经处理过了，此时，oldCh == [A, undefined, C]，这样，在后续的循环中，就会触发 isUndef(oldStartVnode) 或 isUndef(oldEndVnode) 条件了
+    2. 如果 newStartVnode 对应到了 oldCh 中的某个元素，比如：[A, B, C] => [B, A, E]，那么就直接移动该元素到 oldStartIdx 对应的节点前面，同时还会将 oldCh 中对应的节点置为 undefined，表示元素已经处理过了，此时，oldCh == [A, undefined, C]，这样，在后续的循环中，就可以触发 isUndef(oldStartVnode) 或 isUndef(oldEndVnode) 条件了
     3. 另外，还可能会有重复 key 或者 key 相同但是 tag 等属性不同的情况，比如：[A, B, C] => [B, A, A, C]，对于这类情况，newStartVnode 也会被作为新元素处理
 
 循环结束时，必然会满足 oldStartIdx > oldEndIdx 或 newStartIdx > newEndIdx 两种情况之一，所以对这两种情况需要进一步处理：
 1. oldStartIdx > oldEndIdx 的情况，比如 [A] => [A, B, C]，循环结束时，ch 中的 B 和 C 都还没有添加到页面中，这时就会调用 addVnodes() 方法将他们依次添加
 2. newStartIdx > newEndIdx 的情况，比如 [A, B, C] => [D]，循环结束时，A, B, C 都还保留在页面中，这时需要调用 removeVnodes() 将他们从页面中移除
 
-如果循环结束时，新旧序列中的节点全部都处理完毕了，如：[A, B] => [B, A]，那么，虽然也会触发这两种逻辑之一，但是并不会对DOM产生实际的影响。
+如果循环结束时，新旧序列中的节点全部都处理完毕了，如：[A, B] => [B, A]，那么，虽然也会触发这两种逻辑之一，但是并不会对 DOM 产生实际的影响。
 
 下面通过一些例子来展示该方法对 DOM 节点的操作流程：
 
 [A, B] => [A, C]
 
 | 序号 | 说明 | oldStartIdx | oldEndIdx | newStartIdx | newEndIdx | DOM |
-| --- | ---- | ----- | ----------- | -------- | ----| ----------- | --------- | --- |
+| --- | ---- | ----------- | -------- | ----------- | --------- | --- |
 | 0 | 初始状态 | 0 | 1 | 0 | 1 | A, B |
 | 1 | 第一次循环，满足 sameVnode(oldStartVnode, newStartVnode)， 无 DOM 操作 | 1 | 1 | 1 | 1 | A, B |
 | 2 | 第二次循环，满足 isUndef(idxInOld) 条件，新增 C 到 B 之前 | 1 | 1 | 2 | 1 | A, C, B |
@@ -350,7 +350,7 @@ oldCh 和 ch 是代表旧和新两个 Vnode 节点序列，oldStartIdx、newStar
 | 3 | 循环结束，满足 oldStartIdx > oldEndIdx ，无 DOM 操作 | 2 | 1 | 1 | 0 | B, A |
 
 
-通过以上流程，视图再次得到了更新。同时，新的vnode和elm也会被保存，供下一次视图更新时使用。
+通过以上流程，视图再次得到了更新。同时，新的 vnode 和 elm 也会被保存，供下一次视图更新时使用。
 
 以上分析了 Vnode 渲染和更新过程中的主要方法和流程，下面是本例中涉及到的主要方法的流程图：
 ![Vnode 流程图](./vnode.png "vnode 流程图")
